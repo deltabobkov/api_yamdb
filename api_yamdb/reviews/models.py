@@ -4,6 +4,9 @@ from django.db import models
 
 User = get_user_model()
 
+class Title(models.Model):
+    pass
+
 
 class Review(models.Model):
     author = models.ForeignKey(
