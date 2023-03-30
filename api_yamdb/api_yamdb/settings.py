@@ -27,6 +27,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'users.apps.UsersConfig',
     'api.apps.ApiConfig'
+    "reviews"
+
 ]
 
 MIDDLEWARE = [
@@ -88,6 +90,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Internationalization
 
