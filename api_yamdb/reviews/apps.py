@@ -2,4 +2,6 @@ from django.apps import AppConfig
 
 
 class ReviewsConfig(AppConfig):
-    name = "reviews"
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'reviews'
+    verbose_name = 'Управление произведениями'
