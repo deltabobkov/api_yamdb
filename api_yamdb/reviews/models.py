@@ -52,7 +52,7 @@ class Review(models.Model):
         User, on_delete=models.CASCADE, related_name='review'
     )
     title = models.ForeignKey(
-        Title, on_delete=models.CASCADE, related_name='review'
+        Titles, on_delete=models.CASCADE, related_name='review'
     )
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
