@@ -1,15 +1,6 @@
-import secrets
-import string
-
-from django.core.mail import send_mail
 from rest_framework import serializers
 from users.models import CHOICES, User
-
-
-def generate_confirm_code():
-    alphabet = string.ascii_letters + string.digits
-    confirm_code = ''.join(secrets.choice(alphabet) for i in range(10))
-    return confirm_code
+from users.utils import generate_confirm_code, mail_send
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -28,17 +19,17 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         confirm_code = generate_confirm_code()
         user = User.objects.create(**validated_data, confirm_code=confirm_code)
+        user = User.objects.create(**validated_data)
+
         confirm_code = confirm_code
         message = (
-            f"user: {validated_data['username']}\n"
-            f"confirm code: {str(confirm_code)}"
+            f"user: {user.username}\n"
+            f"confirm code: {str(user.confirm_code)}"
         )
-        to_email = user.email
-        send_mail(
-            'Activate your account.',
-            message,
-            'no-replay@yamdb.com',
-            [to_email],
-            fail_silently=False,
+        mail_send(
+            subject="Confirmation code",
+            message=message,
+            sender='no-replay@yamdb.com',
+            recipients=[user.email]
         )
         return user
