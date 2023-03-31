@@ -21,6 +21,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def auth(request):
     if request.method != 'POST':
         return Response(status=status.HTTP_400_BAD_REQUEST)
