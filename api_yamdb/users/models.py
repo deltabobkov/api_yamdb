@@ -1,6 +1,6 @@
-from django.db import models
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import RegexValidator
+from django.db import models
 
 CHOICES = (
     (1, "admin"),

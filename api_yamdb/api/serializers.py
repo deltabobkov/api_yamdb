@@ -1,8 +1,9 @@
-from rest_framework import serializers
-from users.models import User, CHOICES
-from django.core.mail import send_mail
 import secrets
 import string
+
+from django.core.mail import send_mail
+from rest_framework import serializers
+from users.models import CHOICES, User
 
 
 def generate_confirm_code():
