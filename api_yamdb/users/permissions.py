@@ -3,7 +3,9 @@ from rest_framework import permissions
 
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.user.role == 1:
+        if request.user.is_anonymous:
+            return False
+        if request.user.role == "admin":
             return True
         if request.user.is_staff:
             return True
@@ -12,7 +14,9 @@ class IsAdmin(permissions.BasePermission):
 
 class IsModerator(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.user.role == 3:
+        if request.user.is_anonymous:
+            return False
+        if request.user.role == "moderator":
             return True
         return False
 
@@ -20,6 +24,6 @@ class IsModerator(permissions.BasePermission):
 class IsUser(permissions.BasePermission):
     """If list or post new"""
     def has_permission(self, request, view):
-        if request.user.role == 2:
+        if request.user.role == "user":
             return True
         return False

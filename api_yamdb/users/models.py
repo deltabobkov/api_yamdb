@@ -3,15 +3,15 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 CHOICES = (
-    (1, "admin"),
-    (2, "user"),
-    (3, "moderator")
+    ("admin", "admin"),
+    ("user", "user"),
+    ("moderator", "moderator")
 )
 
 
 class UserManager(BaseUserManager):
 
-    def create_user(self, username, email, password=None):
+    def create_user(self, username, email, password=None, **extra_fields):
         """
         Creates and saves a User with the given email and username.
         """
@@ -19,26 +19,34 @@ class UserManager(BaseUserManager):
             raise TypeError('Users should have a username')
         if email is None:
             raise TypeError('Users should have a Email')
+        if username == 'me':
+            raise TypeError('Users not may username me')
         user = self.model(
             username=username,
-            email=self.normalize_email(email),
+            email=email,
+            **extra_fields
         )
         user.set_unusable_password
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, email, password=None):
+    def create_superuser(self, username, email, password):
         """
         Creates and saves a superuser with the given email and password.
         """
         if password is None:
             raise TypeError('Password should not be none')
-        user = self.create_user(
-            username,
-            email,
-            password,
+        if username is None:
+            raise TypeError('Users should have a username')
+        if email is None:
+            raise TypeError('Users should have a Email')
+        if username == 'me':
+            raise TypeError('Users not may username me')
+        user = self.model(
+            username=username,
+            email=email
         )
-        user.is_superuser = True
+        user.set_password(password)
         user.is_admin = True
         user.save(using=self._db)
         return user
@@ -49,12 +57,14 @@ class User(AbstractBaseUser):
     username = models.CharField(
         max_length=150,
         unique=True,
+        null=False,
+        blank=False,
         validators=[
             RegexValidator(
-                regex='^[a-zA-Z0-9]*$',
+                regex='^(?!^me$)[\w.@+-]+$',
                 message='Username must be Alphanumeric',
                 code='invalid_username'
-            ),
+            )
         ]
     )
     first_name = models.CharField(max_length=150, null=True, blank=True)
@@ -62,21 +72,24 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     email = models.EmailField(
-        verbose_name='email address',
         max_length=254,
+        verbose_name='email address',
         unique=True,
+        null=False,
+        blank=False,
     )
     bio = models.TextField(
         'Биография',
         blank=True,
+        null=True
     )
-    role = models.IntegerField(
+    role = models.CharField(
+        max_length=50,
         choices=CHOICES,
-        default=2,
+        default="user",
         null=True,
         blank=True
     )
-    is_verified = models.BooleanField(default=False),
     confirm_code = models.CharField(max_length=20, null=True, blank=True)
 
     objects = UserManager()
