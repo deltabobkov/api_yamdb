@@ -7,7 +7,7 @@ class IsAdmin(permissions.BasePermission):
             return False
         if request.user.role == "admin":
             return True
-        if request.user.is_staff:
+        if request.user.is_staff or request.user.is_superuser:
             return True
         return False
 

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from rest_framework_simplejwt.tokens import SlidingToken
+from rest_framework_simplejwt.tokens import AccessToken
 from users.models import User
 from users.utils import generate_confirm_code, mail_send
 
@@ -23,6 +23,11 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create(**validated_data,
                                    confirm_code=generate_confirm_code())
         return user
+
+    def update(self, instance, validated_data):
+        if validated_data.get('role'):
+            validated_data.pop('role')
+        return super().update(instance, validated_data)
 
 
 class SingupSerializer(serializers.ModelSerializer):
@@ -86,6 +91,5 @@ class AuthSerializer(serializers.ModelSerializer):
         user = get_object_or_404(User, **validated_data)
         if user.confirm_code != validated_data.get("confirmation_code"):
             raise PermissionDenied('Код подтверждния или учетная запись')
-        token = SlidingToken.for_user(user)
-
+        token = AccessToken.for_user(user)
         return token

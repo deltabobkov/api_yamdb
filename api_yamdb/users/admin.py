@@ -61,6 +61,7 @@ class UserAdmin(BaseUserAdmin):
                                       'bio')}),
         ('Permissions', {'fields': ('role',
                                     'confirm_code',
+                                    'is_superuser',
                                     'is_admin',
                                     'is_active')}),
     )
@@ -70,6 +71,7 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('username',
                        'email',
                        'is_active',
+                       'is_superuser',
                        'is_admin',
                        'role',
                        'first_name',

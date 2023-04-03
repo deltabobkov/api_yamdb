@@ -30,7 +30,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, email, password):
+    def create_superuser(self, username, email, password, **extra_fields):
         """
         Creates and saves a superuser with the given email and password.
         """
@@ -44,10 +44,12 @@ class UserManager(BaseUserManager):
             raise TypeError('Users not may username me')
         user = self.model(
             username=username,
-            email=email
+            email=email,
+            **extra_fields
         )
         user.set_password(password)
         user.is_admin = True
+        user.is_superuser
         user.save(using=self._db)
         return user
 
@@ -91,6 +93,7 @@ class User(AbstractBaseUser):
         blank=True
     )
     confirm_code = models.CharField(max_length=20, null=True, blank=True)
+    is_superuser = models.BooleanField(default=False)
 
     objects = UserManager()
 
