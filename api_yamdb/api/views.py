@@ -67,8 +67,7 @@ def signup(request):
 @api_view(['GET', 'PATCH'])
 def selfuser(request):
     user = request.user
-    # if request.data.get('role'):
-       
+
     serializer = UserSerializer(user, data=request.data, partial=True)
     if serializer.is_valid():
         if request.method == 'PATCH':
