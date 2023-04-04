@@ -3,7 +3,6 @@ from http import HTTPStatus
 import pytest
 from django.core import mail
 from django.db.utils import IntegrityError
-
 from tests.utils import (invalid_data_for_user_patch_and_creation,
                          invalid_data_for_username_and_email_fields)
 
