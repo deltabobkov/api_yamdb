@@ -2,11 +2,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import ParseError, ValidationError
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from users.models import User
 from users.permissions import IsAdmin
+from rest_framework.decorators import action
 
 from django.shortcuts import get_object_or_404
 
@@ -21,6 +22,23 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('username',)
     http_method_names = ['get', 'post', 'patch', 'delete']
+
+    @action(detail=False,
+            methods=['get', 'patch'],
+            url_path='me',
+            url_name='me',
+            permission_classes=(IsAuthenticated,))
+    def selfuser(self, request):
+        serializer = UserSerializer(
+            request.user,
+            data=request.data,
+            partial=True
+        )
+        if serializer.is_valid():
+            if request.method == 'PATCH':
+                serializer.save()
+            return Response(serializer.data)
+        raise ValidationError(serializer.errors)
 
 
 @api_view(['POST'])
@@ -62,15 +80,3 @@ def signup(request):
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
     return Response("Bad request", status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['GET', 'PATCH'])
-def selfuser(request):
-    user = request.user
-
-    serializer = UserSerializer(user, data=request.data, partial=True)
-    if serializer.is_valid():
-        if request.method == 'PATCH':
-            serializer.save()
-        return Response(serializer.data)
-    raise ValidationError(serializer.errors)
