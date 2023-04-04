@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from users.models import User
 
-
 class Category(models.Model):
     name = models.CharField(
         'Имя категории',
