@@ -2,10 +2,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
-
-
-User = get_user_model()
-
+from users.models import User
 
 class Category(models.Model):
     name = models.CharField(
@@ -52,7 +49,7 @@ class Review(models.Model):
         User, on_delete=models.CASCADE, related_name='review'
     )
     title = models.ForeignKey(
-        Title, on_delete=models.CASCADE, related_name='review'
+        Titles, on_delete=models.CASCADE, related_name='review'
     )
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
@@ -64,7 +61,14 @@ class Review(models.Model):
 
     class Meta:
         verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
         ordering = ['-pub_date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_review'
+            ),
+        ]
 
     def __str__(self) -> str:
         return self.text
@@ -83,14 +87,14 @@ class Comment(models.Model):
     text = models.TextField(
         'Текст комментария',
     )
-    created = models.DateTimeField(
+    pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
     )
 
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        ordering = ['-created']
+        ordering = ['-pub_date']
 
     def __str__(self) -> str:
         return self.text
