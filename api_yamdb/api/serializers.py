@@ -1,10 +1,9 @@
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import Comment, Review
+from reviews.models import Title, Genre, Category, Comment, Review
 from users.models import User
 from users.utils import generate_confirm_code, mail_send
-
 from django.shortcuts import get_object_or_404
 
 
@@ -55,24 +54,6 @@ class SingupSerializer(serializers.ModelSerializer):
         )
         return user
 
-    def update(self, instance, validated_data):
-        return super().update(instance, validated_data)
-
-    def update(self, instance, validated_data):
-        instance.confirm_code = generate_confirm_code()
-        instance.save()
-        message = (
-            f'Username: {instance.username}\n'
-            f'Confirmation code: {instance.confirm_code}\n'
-        )
-        mail_send(
-            subject="Confirmation code",
-            message=message,
-            sender='no-replay@yamdb.com',
-            recipients=[instance.email]
-        )
-        return super().update(instance, validated_data)
-
 
 class AuthSerializer(serializers.ModelSerializer):
     username = serializers.CharField(read_only=True)
@@ -96,26 +77,12 @@ class AuthSerializer(serializers.ModelSerializer):
         return token
 
 
-class ReviewSerializer(serializers.ModelSerializer):
-    title = serializers.SlugRelatedField(
-        slug_field='name',
-        read_only=True,
-    )
-    author = serializers.SlugRelatedField(
-        slug_field='username',
-        read_only=True
-    )
-
-    class Meta:
-        model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
-
 class CommentSerializer(serializers.ModelSerializer):
     review = serializers.SlugRelatedField(
         slug_field='text',
         read_only=True
     )
-    
+
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
     )
@@ -123,7 +90,6 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
-
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -140,17 +106,43 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
 
-class CommentSerializer(serializers.ModelSerializer):
-    review = serializers.SlugRelatedField(
-        slug_field='text',
-        read_only=True
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = '__all__'
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+
+class TitlesPostSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug'
     )
-    
-    author = serializers.SlugRelatedField(
-        read_only=True, slug_field='username'
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True
     )
 
     class Meta:
-        model = Comment
-        fields = ('id', 'text', 'author', 'pub_date')
+        fields = '__all__'
+        model = Title
 
+
+class TitlesGetSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(
+        read_only=True,
+        many=True
+    )
+    rating = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = Title
