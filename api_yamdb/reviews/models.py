@@ -1,8 +1,9 @@
-
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
-from users.models import User
+
+User = get_user_model()
+
 
 class Category(models.Model):
     name = models.CharField(
@@ -26,30 +27,33 @@ class Genre(models.Model):
         verbose_name = 'Жанр'
 
 
-class Titles(models.Model):
+class Title(models.Model):
     name = models.CharField(
         'Имя жанра',
         max_length=200
     )
     year = models.IntegerField('год')
-    genre = models.ForeignKey(
-        Genre, on_delete=models.CASCADE, related_name='genre', null=True)
-    category = models.ForeignKey(
-        Category, on_delete=models.CASCADE, related_name='category', null=True)
+    genre = models.ManyToManyField(
+        Genre,
+        related_name='titles',
+        verbose_name='Жанр'
+    )
+    category = models.ManyToManyField(
+        Category, related_name='category', null=True, verbose_name='Категория')
 
     class Meta:
         verbose_name = 'Произведение'
 
     def __str__(self):
         return self.name
-        
+
 
 class Review(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='review'
     )
     title = models.ForeignKey(
-        Titles, on_delete=models.CASCADE, related_name='review'
+        Title, on_delete=models.CASCADE, related_name='review'
     )
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
@@ -61,14 +65,7 @@ class Review(models.Model):
 
     class Meta:
         verbose_name = 'Отзыв'
-        verbose_name_plural = 'Отзывы'
         ordering = ['-pub_date']
-        constraints = [
-            models.UniqueConstraint(
-                fields=['title', 'author'],
-                name='unique_review'
-            ),
-        ]
 
     def __str__(self) -> str:
         return self.text
@@ -87,14 +84,14 @@ class Comment(models.Model):
     text = models.TextField(
         'Текст комментария',
     )
-    pub_date = models.DateTimeField(
+    created = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
     )
 
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        ordering = ['-pub_date']
+        ordering = ['-created']
 
     def __str__(self) -> str:
         return self.text
