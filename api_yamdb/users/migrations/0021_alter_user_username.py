@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0020_auto_20230401_2023'),
     ]
@@ -16,6 +15,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='user',
             name='username',
-            field=models.CharField(max_length=150, unique=True, validators=[django.core.validators.RegexValidator(re.compile('^[-a-zA-Z0-9_]+\\Z'), 'Enter a valid “slug” consisting of letters, numbers, underscores or hyphens.', 'invalid')]),
+            field=models.CharField(
+                max_length=150,
+                unique=True,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        re.compile('^[-a-zA-Z0-9_]+\\Z'),
+                        'Enter a valid “slug” consisting of letters, numbers, underscores or hyphens.',
+                        'invalid',
+                    )
+                ],
+            ),
         ),
     ]

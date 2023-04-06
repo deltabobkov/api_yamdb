@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0002_auto_20230328_2313'),
     ]
@@ -17,7 +16,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='user',
             name='role',
-            field=models.PositiveSmallIntegerField(choices=[(1, 'admin'), (2, 'user'), (3, 'moderator')], default=2),
+            field=models.PositiveSmallIntegerField(
+                choices=[(1, 'admin'), (2, 'user'), (3, 'moderator')],
+                default=2,
+            ),
             preserve_default=False,
         ),
     ]

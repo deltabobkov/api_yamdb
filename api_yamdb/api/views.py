@@ -1,47 +1,58 @@
-from django_filters.rest_framework import DjangoFilterBackend
-from django.shortcuts import get_object_or_404
-from rest_framework import filters, status, viewsets, mixins
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.exceptions import ParseError, ValidationError, PermissionDenied
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from django_filters.rest_framework import (
+    CharFilter,
+    DjangoFilterBackend,
+    FilterSet,
+)
+from rest_condition import Or
+from rest_framework import filters, mixins, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.exceptions import ParseError, ValidationError
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.decorators import action
-from reviews.models import Review, Title, Genre, Category
+from users.models import User
+from users.permissions import IsAdmin, IsAuthorOrReadOnly, NonAuth, ReadOnly
+
+from django.db.models import Avg
+from django.shortcuts import get_object_or_404
+
+from reviews.models import Category, Genre, Review, Title
+
 from .serializers import (
-    TitlesPostSerializer,
-    GenreSerializer,
     CategorySerializer,
     CommentSerializer,
-    TitlesGetSerializer,
+    GenreSerializer,
+    ReviewSerializer,
     SingupSerializer,
+    TitlesGetSerializer,
+    TitlesPostSerializer,
     UserSerializer,
-    ReviewSerializer
 )
-from users.models import User
-from users.permissions import IsAdmin, ReadOnly, IsModerator, IsUser, IsAuthorOrReadOnly, NonAuth
-from rest_condition import Or
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
-    lookup_field = ('username')
+    lookup_field = 'username'
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('username',)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
-    @action(detail=False,
-            methods=['get', 'patch'],
-            url_path='me',
-            url_name='me',
-            permission_classes=(IsAuthenticated,))
+    @action(
+        detail=False,
+        methods=['get', 'patch'],
+        url_path='me',
+        url_name='me',
+        permission_classes=(IsAuthenticated,),
+    )
     def selfuser(self, request):
         serializer = UserSerializer(
-            request.user,
-            data=request.data,
-            partial=True
+            request.user, data=request.data, partial=True
         )
         if serializer.is_valid():
             if request.method == 'PATCH':
@@ -76,24 +87,32 @@ def signup(request):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     else:
-        if User.objects.filter(username=request.data.get("username"),
-                               email=request.data.get("email")).exists():
-            user = User.objects.get(username=request.data.get("username"),
-                                    email=request.data.get("email"))
-            serializer = SingupSerializer(user,
-                                          data=request.data,
-                                          partial=True)
+        if User.objects.filter(
+            username=request.data.get("username"),
+            email=request.data.get("email"),
+        ).exists():
+            user = User.objects.get(
+                username=request.data.get("username"),
+                email=request.data.get("email"),
+            )
+            serializer = SingupSerializer(
+                user, data=request.data, partial=True
+            )
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
     return Response("Bad request", status=status.HTTP_400_BAD_REQUEST)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (Or(IsAuthorOrReadOnly, NonAuth), IsAuthenticatedOrReadOnly,)
+    permission_classes = (
+        Or(IsAuthorOrReadOnly, NonAuth),
+        IsAuthenticatedOrReadOnly,
+    )
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -108,7 +127,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (Or(IsAuthorOrReadOnly, NonAuth), IsAuthenticatedOrReadOnly,)
+    permission_classes = (
+        Or(IsAuthorOrReadOnly, NonAuth),
+        IsAuthenticatedOrReadOnly,
+    )
 
     def get_queryset(self):
         review_id = self.kwargs.get('review_id')
@@ -122,12 +144,23 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review=review)
 
 
+class TitleSlugFilter(FilterSet):
+    genre = CharFilter(field_name='genre__slug')
+    category = CharFilter(field_name='category__slug')
+
+    class Meta:
+        model = Title
+        fields = ['name', 'year', 'category', 'genre']
+
+
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = (
+        Title.objects.all().annotate(Avg('reviews__score')).order_by('name')
+    )
     serializer_class = TitlesGetSerializer
     permission_classes = (Or(ReadOnly, IsAdmin),)
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ['genre', ]
+    filterset_class = TitleSlugFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -139,21 +172,25 @@ class GenreViewSet(
     mixins.CreateModelMixin,
     mixins.DestroyModelMixin,
     mixins.ListModelMixin,
-    viewsets.GenericViewSet
+    viewsets.GenericViewSet,
 ):
-
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (Or(ReadOnly, IsAdmin),)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    search_fields = ('name',)
-    # filterset_fields = ['slug', ]
-    # lookup_field = ('slug',)
+    search_fields = ('^name',)
+    lookup_field = 'slug'
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
+class CategoryViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     serializer_class = CategorySerializer
+    queryset = Category.objects.all()
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('^name',)
+    lookup_field = 'slug'
     permission_classes = (Or(ReadOnly, IsAdmin),)
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    search_fields = ('name',)

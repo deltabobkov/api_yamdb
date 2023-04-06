@@ -1,43 +1,43 @@
-from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
 from users.models import User
+
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
 
 class Category(models.Model):
-    name = models.CharField(
-        'Имя категории',
-        max_length=200
+    name = models.CharField('Имя категории', max_length=200)
+    slug = models.SlugField(
+        'Категория',
+        max_length=50,
+        unique=True,
     )
-    slug = models.SlugField('Категория', max_length=50, unique=True,)
 
     class Meta:
         verbose_name = 'Категория'
 
 
 class Genre(models.Model):
-    name = models.CharField(
-        'Имя жанра',
-        max_length=256
+    name = models.CharField('Имя жанра', max_length=256)
+    slug = models.SlugField(
+        'Жанр',
+        max_length=50,
+        unique=True,
     )
-    slug = models.SlugField('Жанр', max_length=50, unique=True,)
 
     class Meta:
         verbose_name = 'Жанр'
 
 
 class Title(models.Model):
-    name = models.CharField(
-        'Имя жанра',
-        max_length=200
-    )
+    name = models.CharField('Имя жанра', max_length=200)
     year = models.IntegerField('год')
+    description = models.TextField(blank=True, verbose_name='Описание')
     genre = models.ManyToManyField(
-        Genre,
-        related_name='titles',
-        verbose_name='Жанр'
+        Genre, related_name='titles', verbose_name='Жанр'
     )
     category = models.ForeignKey(
-        Category, on_delete=models.CASCADE, related_name='category', null=True)
+        Category, on_delete=models.CASCADE, related_name='category', null=True
+    )
 
     class Meta:
         verbose_name = 'Произведение'
@@ -67,8 +67,7 @@ class Review(models.Model):
         ordering = ['pub_date']
         constraints = [
             models.UniqueConstraint(
-                fields=['title', 'author'],
-                name='unique_review'
+                fields=['title', 'author'], name='unique_review'
             ),
         ]
 

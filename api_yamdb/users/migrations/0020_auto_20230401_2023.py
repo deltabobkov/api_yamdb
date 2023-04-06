@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0019_alter_user_role'),
     ]
@@ -14,11 +13,23 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='user',
             name='bio',
-            field=models.TextField(blank=True, null=True, verbose_name='Биография'),
+            field=models.TextField(
+                blank=True, null=True, verbose_name='Биография'
+            ),
         ),
         migrations.AlterField(
             model_name='user',
             name='username',
-            field=models.CharField(max_length=150, unique=True, validators=[django.core.validators.RegexValidator(code='invalid_username', message='Username must be Alphanumeric', regex='^[\\w.@+-]+\\Z')]),
+            field=models.CharField(
+                max_length=150,
+                unique=True,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        code='invalid_username',
+                        message='Username must be Alphanumeric',
+                        regex='^[\\w.@+-]+\\Z',
+                    )
+                ],
+            ),
         ),
     ]

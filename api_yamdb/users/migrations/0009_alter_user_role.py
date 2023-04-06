@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0008_remove_user_is_staff'),
     ]
@@ -13,6 +12,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='user',
             name='role',
-            field=models.PositiveIntegerField(choices=[(1, 'Admin'), (2, 'User'), (3, 'Moderator')], default=2),
+            field=models.PositiveIntegerField(
+                choices=[(1, 'Admin'), (2, 'User'), (3, 'Moderator')],
+                default=2,
+            ),
         ),
     ]
