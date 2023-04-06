@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets, mixins
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import ParseError, ValidationError, PermissionDenied
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.decorators import action
@@ -19,7 +19,7 @@ from .serializers import (
     ReviewSerializer
 )
 from users.models import User
-from users.permissions import IsAdmin, ReadOnly, IsModerator, IsUser
+from users.permissions import IsAdmin, ReadOnly, IsModerator, IsUser, IsAuthorOrReadOnly, NonAuth
 from rest_condition import Or
 
 
@@ -93,7 +93,7 @@ def signup(request):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (Or(ReadOnly, IsAdmin, IsModerator, IsUser),)
+    permission_classes = (Or(IsAuthorOrReadOnly, NonAuth), IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -108,7 +108,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (Or(ReadOnly, IsUser, IsAdmin, IsModerator),)
+    permission_classes = (Or(IsAuthorOrReadOnly, NonAuth), IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
         review_id = self.kwargs.get('review_id')
