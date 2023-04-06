@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0016_auto_20230330_2206'),
     ]
@@ -14,6 +13,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='user',
             name='username',
-            field=models.CharField(max_length=150, unique=True, validators=[django.core.validators.RegexValidator(code='invalid_username', message='Username must be Alphanumeric', regex='^[a-zA-Z0-9]*$')]),
+            field=models.CharField(
+                max_length=150,
+                unique=True,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        code='invalid_username',
+                        message='Username must be Alphanumeric',
+                        regex='^[a-zA-Z0-9]*$',
+                    )
+                ],
+            ),
         ),
     ]

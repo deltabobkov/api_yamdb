@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0005_auto_20230330_1607'),
     ]
@@ -16,8 +15,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelManagers(
             name='user',
-            managers=[
-            ],
+            managers=[],
         ),
         migrations.RenameField(
             model_name='user',
@@ -57,12 +55,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='user',
             name='role',
-            field=models.PositiveSmallIntegerField(choices=[(1, 'admin'), (2, 'user'), (3, 'moderator')], default=2),
+            field=models.PositiveSmallIntegerField(
+                choices=[(1, 'admin'), (2, 'user'), (3, 'moderator')],
+                default=2,
+            ),
         ),
         migrations.AlterField(
             model_name='user',
             name='email',
-            field=models.EmailField(max_length=255, unique=True, verbose_name='email address'),
+            field=models.EmailField(
+                max_length=255, unique=True, verbose_name='email address'
+            ),
         ),
         migrations.AlterField(
             model_name='user',
