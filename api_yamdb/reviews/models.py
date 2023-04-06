@@ -1,8 +1,6 @@
 from django.db import models
-from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
-
-User = get_user_model()
+from users.models import User
 
 
 class Category(models.Model):
@@ -10,7 +8,7 @@ class Category(models.Model):
         'Имя категории',
         max_length=200
     )
-    slug = models.SlugField('Категория', max_length=100, unique=True,)
+    slug = models.SlugField('Категория', max_length=50, unique=True,)
 
     class Meta:
         verbose_name = 'Категория'
@@ -19,9 +17,9 @@ class Category(models.Model):
 class Genre(models.Model):
     name = models.CharField(
         'Имя жанра',
-        max_length=200
+        max_length=256
     )
-    slug = models.SlugField('Жанр', max_length=100, unique=True,)
+    slug = models.SlugField('Жанр', max_length=50, unique=True,)
 
     class Meta:
         verbose_name = 'Жанр'
@@ -50,10 +48,10 @@ class Title(models.Model):
 
 class Review(models.Model):
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='review'
+        User, on_delete=models.CASCADE, related_name='reviews'
     )
     title = models.ForeignKey(
-        Title, on_delete=models.CASCADE, related_name='review'
+        Title, on_delete=models.CASCADE, related_name='reviews'
     )
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
@@ -84,14 +82,14 @@ class Comment(models.Model):
     text = models.TextField(
         'Текст комментария',
     )
-    created = models.DateTimeField(
+    pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
     )
 
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        ordering = ['-created']
+        ordering = ['-pub_date']
 
     def __str__(self) -> str:
         return self.text
