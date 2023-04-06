@@ -38,8 +38,8 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='Жанр'
     )
-    category = models.ManyToManyField(
-        Category, related_name='category', null=True, verbose_name='Категория')
+    category = models.ForeignKey(
+        Category, on_delete=models.CASCADE, related_name='category', null=True)
 
     class Meta:
         verbose_name = 'Произведение'

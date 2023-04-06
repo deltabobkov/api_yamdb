@@ -3,15 +3,28 @@ from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import ParseError, ValidationError
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.pagination import LimitOffsetPagination
+# from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.decorators import action
 from reviews.models import Review, Title, Genre, Category
-from .serializers import TitlesPostSerializer, GenreSerializer, CategorySerializer, CommentSerializer, TitlesGetSerializer, SingupSerializer, UserSerializer, ReviewSerializer
+from .serializers import (
+    TitlesPostSerializer,
+    GenreSerializer,
+    CategorySerializer,
+    CommentSerializer,
+    TitlesGetSerializer,
+    SingupSerializer,
+    UserSerializer,
+    ReviewSerializer
+)
 from users.models import User
-from users.permissions import IsAdmin
+from users.permissions import IsAdmin, ReadOnly
+from rest_condition import Or
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -127,10 +140,12 @@ class TitleViewSet(viewsets.ModelViewSet):
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly)
+    permission_classes = (Or(ReadOnly, IsAdmin),)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)

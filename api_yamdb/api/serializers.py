@@ -54,6 +54,21 @@ class SingupSerializer(serializers.ModelSerializer):
         )
         return user
 
+    def update(self, instance, validated_data):
+        instance.confirm_code = generate_confirm_code()
+        instance.save()
+        message = (
+            f'Username: {instance.username}\n'
+            f'Confirmation code: {instance.confirm_code}\n'
+        )
+        mail_send(
+            subject="Confirmation code",
+            message=message,
+            sender='no-replay@yamdb.com',
+            recipients=[instance.email]
+        )
+        return super().update(instance, validated_data)
+
 
 class AuthSerializer(serializers.ModelSerializer):
     username = serializers.CharField(read_only=True)
@@ -116,7 +131,10 @@ class GenreSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = (
+            'name',
+            'slug',
+        )
 
 
 class TitlesPostSerializer(serializers.ModelSerializer):
