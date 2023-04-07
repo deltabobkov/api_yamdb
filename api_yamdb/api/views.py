@@ -1,38 +1,26 @@
-from django_filters.rest_framework import (
-    CharFilter,
-    DjangoFilterBackend,
-    FilterSet,
-)
+from django_filters.rest_framework import (CharFilter, DjangoFilterBackend,
+                                           FilterSet)
 from rest_condition import Or
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import ParseError, ValidationError
-from rest_framework.permissions import (
-    AllowAny,
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
-)
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from users.models import User
-from .permissions import IsAdmin, IsAuthorOrReadOnly, NonAuth, ReadOnly
 
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Genre, Review, Title
-
-from .serializers import (
-    CategorySerializer,
-    CommentSerializer,
-    GenreSerializer,
-    ReviewSerializer,
-    SingupSerializer,
-    TitlesGetSerializer,
-    TitlesPostSerializer,
-    UserSerializer,
-)
+from users.models import User
 from users.utils import generate_confirm_code, mail_send
+
+from .permissions import IsAdmin, IsAuthorOrReadOnly, NonAuth, ReadOnly
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer, SingupSerializer,
+                          TitlesGetSerializer, TitlesPostSerializer,
+                          UserSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
