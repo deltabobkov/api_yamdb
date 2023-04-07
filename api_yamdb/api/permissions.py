@@ -22,7 +22,7 @@ class IsModerator(permissions.BasePermission):
 
 
 class IsUser(permissions.BasePermission):
-    '''If list or post new'''
+    """If list or post new."""
 
     def has_permission(self, request, view):
         if request.user.is_anonymous:
