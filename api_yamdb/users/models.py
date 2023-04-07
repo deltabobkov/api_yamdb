@@ -7,9 +7,9 @@ CHOICES = (('admin', 'admin'), ('user', 'user'), ('moderator', 'moderator'))
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password=None, **extra_fields):
-        '''
+        """
         Creates and saves a User with the given email and username.
-        '''
+        """
         if username is None:
             raise TypeError('Users should have a username')
         if email is None:
@@ -22,9 +22,9 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, username, email, password, **extra_fields):
-        '''
+        """
         Creates and saves a superuser with the given email and password.
-        '''
+        """
         if password is None:
             raise TypeError('Password should not be none')
         if username is None:
@@ -77,6 +77,9 @@ class User(AbstractBaseUser):
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
+    
+    class Meta:
+        verbose_name = 'Пользователь'
 
     def __str__(self):
         return self.username
