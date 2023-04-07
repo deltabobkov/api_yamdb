@@ -1,14 +1,14 @@
+from users.models import User
+
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group
 
-from users.models import User
-
 
 class UserCreationForm(forms.ModelForm):
-    """vA form for creating new users. Includes all the required
-    fields, plus a repeated password."""
+    '''A form for creating new users. Includes all the required
+    fields, plus a repeated password.'''
 
     class Meta:
         model = User
@@ -31,10 +31,10 @@ class UserCreationForm(forms.ModelForm):
 
 
 class UserChangeForm(forms.ModelForm):
-    """A form for updating users. Includes all the fields on
+    '''A form for updating users. Includes all the fields on
     the user, but replaces the password field with admin's
     password hash display field.
-    """
+    '''
 
     class Meta:
         model = User

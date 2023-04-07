@@ -15,7 +15,7 @@ from rest_framework.permissions import (
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from users.models import User
-from .permissions import IsAdmin, IsAuthorOrReadOnly, NonAuth, ReadOnly
+from users.permissions import IsAdmin, IsAuthorOrReadOnly, NonAuth, ReadOnly
 
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -66,7 +66,7 @@ class UserViewSet(viewsets.ModelViewSet):
 def auth(request):
     if request.method != 'POST':
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    if not request.data.get("username"):
+    if not request.data.get("username") or request.data.get("username") == "":
         return Response(status=status.HTTP_400_BAD_REQUEST)
     user = get_object_or_404(User, username=request.data.get("username"))
     if user.confirm_code != request.data.get("confirmation_code"):
@@ -117,7 +117,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
         title = get_object_or_404(Title, pk=title_id)
-        return title.reviews.select_related("author")
+        return title.reviews.all()
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get('title_id')
@@ -135,7 +135,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         review_id = self.kwargs.get('review_id')
         review = get_object_or_404(Review, pk=review_id)
-        return review.comments.select_related("author")
+        return review.comments.all()
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get('title_id')
@@ -155,10 +155,7 @@ class TitleSlugFilter(FilterSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = (
-        Title.objects.annotate(Avg('reviews__score'))
-        .select_related('category')
-        .prefetch_related('genre')
-        .order_by('name')
+        Title.objects.all().annotate(Avg('reviews__score')).order_by('name')
     )
     serializer_class = TitlesGetSerializer
     permission_classes = (Or(ReadOnly, IsAdmin),)
