@@ -14,14 +14,15 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from users.models import User
-from users.permissions import IsAdmin, IsAuthorOrReadOnly, NonAuth, ReadOnly
 
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Genre, Review, Title
+from users.models import User
+from users.utils import generate_confirm_code, mail_send
 
+from .permissions import IsAdmin, IsAuthorOrReadOnly, NonAuth, ReadOnly
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -64,9 +65,7 @@ class UserViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def auth(request):
-    if request.method != 'POST':
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-    if not request.data.get("username") or request.data.get("username") == "":
+    if not request.data.get("username"):
         return Response(status=status.HTTP_400_BAD_REQUEST)
     user = get_object_or_404(User, username=request.data.get("username"))
     if user.confirm_code != request.data.get("confirmation_code"):
@@ -80,31 +79,34 @@ def auth(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def signup(request):
-    if not User.objects.filter(username=request.data.get("username")).exists():
-        serializer = SingupSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    confirm_code = generate_confirm_code()
+    data = {
+        "confirm_code": confirm_code,
+        "username": request.data.get('username'),
+        "email": request.data.get('email'),
+    }
+    user = User.objects.filter(
+        username=request.data.get("username"),
+        email=request.data.get("email"),
+    ).first()
+    if not user:
+        serializer = SingupSerializer(data=data)
     else:
-        if User.objects.filter(
-            username=request.data.get("username"),
-            email=request.data.get("email"),
-        ).exists():
-            user = User.objects.get(
-                username=request.data.get("username"),
-                email=request.data.get("email"),
-            )
-            serializer = SingupSerializer(
-                user, data=request.data, partial=True
-            )
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
-    return Response("Bad request", status=status.HTTP_400_BAD_REQUEST)
+        serializer = SingupSerializer(user, data=data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        message = (
+            f'Username: {serializer.validated_data.get("username")}\n'
+            f'Confirmation code: {confirm_code}\n'
+        )
+        mail_send(
+            subject="Confirmation code",
+            message=message,
+            sender='no-replay@yamdb.com',
+            recipients=[serializer.validated_data.get("email")],
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
