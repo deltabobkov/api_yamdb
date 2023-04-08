@@ -7,8 +7,8 @@ from django.contrib.auth.models import Group
 
 
 class UserCreationForm(forms.ModelForm):
-    '''A form for creating new users. Includes all the required
-    fields, plus a repeated password.'''
+    """A form for creating new users. Includes all the required
+    fields, plus a repeated password."""
 
     class Meta:
         model = User
@@ -31,10 +31,10 @@ class UserCreationForm(forms.ModelForm):
 
 
 class UserChangeForm(forms.ModelForm):
-    '''A form for updating users. Includes all the fields on
+    """A form for updating users. Includes all the fields on
     the user, but replaces the password field with admin's
     password hash display field.
-    '''
+    """
 
     class Meta:
         model = User

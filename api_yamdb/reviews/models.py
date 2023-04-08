@@ -72,10 +72,11 @@ class Review(models.Model):
         ]
 
     def __str__(self) -> str:
-        return self.text
+        return self.text[: Review.STRING_LENGTH]
 
 
 class Comment(models.Model):
+    STRING_LENGTH = 15
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name='comments'
     )
@@ -98,4 +99,4 @@ class Comment(models.Model):
         ordering = ['-pub_date']
 
     def __str__(self) -> str:
-        return self.text
+        return self.text[: Comment.STRING_LENGTH]
