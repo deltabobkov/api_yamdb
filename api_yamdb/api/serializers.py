@@ -25,7 +25,8 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-        validated_data.pop('role', None)
+        if validated_data.get('role'):
+            validated_data.pop('role')
         return super().update(instance, validated_data)
 
 
@@ -121,7 +122,7 @@ class TitlesPostSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        fields = '__all__'
         model = Title
 
 
@@ -133,13 +134,5 @@ class TitlesGetSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = (
-            'id',
-            'name',
-            'year',
-            'rating',
-            'description',
-            'genre',
-            'category',
-        )
+        fields = '__all__'
         model = Title
