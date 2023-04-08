@@ -119,7 +119,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
         title = get_object_or_404(Title, pk=title_id)
-        return title.reviews.all()
+        return title.reviews.select_related("author")
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get('title_id')
@@ -137,7 +137,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         review_id = self.kwargs.get('review_id')
         review = get_object_or_404(Review, pk=review_id)
-        return review.comments.all()
+        return review.comments.select_related("author")
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get('title_id')
@@ -157,7 +157,10 @@ class TitleSlugFilter(FilterSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = (
-        Title.objects.all().annotate(Avg('reviews__score')).order_by('name')
+        Title.objects.annotate(Avg('reviews__score'))
+        .select_related('category')
+        .prefetch_related('genre')
+        .order_by('name')
     )
     serializer_class = TitlesGetSerializer
     permission_classes = (Or(ReadOnly, IsAdmin),)
