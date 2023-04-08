@@ -4,11 +4,14 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs'
 
+# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+
 
 # Application definition
 
@@ -19,12 +22,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users.apps.UsersConfig',
     'django_filters',
     'rest_framework_simplejwt',
     'rest_framework',
     'djoser',
-    'users.apps.UsersConfig',
-    'reviews.apps.ReviewsConfig',
+    'reviews',
     'api.apps.ApiConfig',
 ]
 
