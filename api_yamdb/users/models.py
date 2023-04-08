@@ -7,9 +7,9 @@ CHOICES = (('admin', 'admin'), ('user', 'user'), ('moderator', 'moderator'))
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password=None, **extra_fields):
-        '''
+        """
         Creates and saves a User with the given email and username.
-        '''
+        """
         if username is None:
             raise TypeError('Users should have a username')
         if email is None:
@@ -22,9 +22,9 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, username, email, password, **extra_fields):
-        '''
+        """
         Creates and saves a superuser with the given email and password.
-        '''
+        """
         if password is None:
             raise TypeError('Password should not be none')
         if username is None:
@@ -86,14 +86,14 @@ class User(AbstractBaseUser):
         return self.username
 
     def has_perm(self, perm, obj=None):
-        'Does the user have a specific permission?'
+        """Does the user have a specific permission?"""
         return True
 
     def has_module_perms(self, app_label):
-        'Does the user have permissions to view the app `app_label`?'
+        """Does the user have permissions to view the app `app_label`?"""
         return True
 
     @property
     def is_staff(self):
-        'Is the user a member of staff?'
+        """Is the user a member of staff?"""
         return self.is_admin

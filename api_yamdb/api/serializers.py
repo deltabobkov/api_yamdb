@@ -20,10 +20,6 @@ class UserSerializer(serializers.ModelSerializer):
             'role',
         )
 
-    def create(self, validated_data):
-        user = User.objects.create(**validated_data)
-        return user
-
     def update(self, instance, validated_data):
         validated_data.pop('role', None)
         return super().update(instance, validated_data)
