@@ -21,7 +21,9 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        user = User.objects.create(**validated_data,)
+        user = User.objects.create(
+            **validated_data,
+        )
         return user
 
     def update(self, instance, validated_data):
@@ -32,11 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
 class SingupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = (
-            'username',
-            'email',
-            'confirm_code'
-        )
+        fields = ('username', 'email', 'confirm_code')
         extra_kwargs = {'confirm_code': {'write_only': True}}
 
 
