@@ -44,6 +44,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser):
     username = models.CharField(
         max_length=150,
+        verbose_name = 'user',
         unique=True,
         null=False,
         blank=False,
