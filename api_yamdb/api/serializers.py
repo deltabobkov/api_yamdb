@@ -1,12 +1,11 @@
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework_simplejwt.tokens import AccessToken
-from users.models import User
-from users.utils import generate_confirm_code, mail_send
 
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -22,9 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        user = User.objects.create(
-            **validated_data, confirm_code=generate_confirm_code()
-        )
+        user = User.objects.create(**validated_data)
         return user
 
     def update(self, instance, validated_data):
@@ -35,41 +32,8 @@ class UserSerializer(serializers.ModelSerializer):
 class SingupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = (
-            'username',
-            'email',
-        )
-
-    def create(self, validated_data):
-        user = User.objects.create(
-            **validated_data, confirm_code=generate_confirm_code()
-        )
-        message = (
-            f'Username: {user.username}\n'
-            f'Confirmation code: {user.confirm_code}\n'
-        )
-        mail_send(
-            subject="Confirmation code",
-            message=message,
-            sender='no-replay@yamdb.com',
-            recipients=[user.email],
-        )
-        return user
-
-    def update(self, instance, validated_data):
-        instance.confirm_code = generate_confirm_code()
-        instance.save()
-        message = (
-            f'Username: {instance.username}\n'
-            f'Confirmation code: {instance.confirm_code}\n'
-        )
-        mail_send(
-            subject="Confirmation code",
-            message=message,
-            sender='no-replay@yamdb.com',
-            recipients=[instance.email],
-        )
-        return super().update(instance, validated_data)
+        fields = ('username', 'email', 'confirm_code')
+        extra_kwargs = {'confirm_code': {'write_only': True}}
 
 
 class AuthSerializer(serializers.ModelSerializer):
