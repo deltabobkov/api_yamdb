@@ -4,7 +4,7 @@
 ![Django](https://img.shields.io/badge/Django-313131?style=flat&logo=django&labelColor=092e20)
 ![DjangoREST](https://img.shields.io/badge/Django-REST-313131?style=flat&logo=django&logoColor=white&color=ff1709&labelColor=313131)
 ![SQLite](https://img.shields.io/badge/SQLite-313131?style=flat&logo=sqlite&logoColor=ffffff&labelColor=033b55)
-
+![Visual Studio](https://img.shields.io/badge/VS%20Code-313131?style=flat&logo=visualstudiocode&logoColor=ffffff&labelColor=0098FF)
 
 ## Проект YaMDb собирает отзывы пользователей на произведения.  
 **Сами произведения в YaMDb не хранятся, здесь нельзя посмотреть фильм или послушать музыку.**  
